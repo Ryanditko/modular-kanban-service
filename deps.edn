@@ -1,0 +1,6 @@
+{:deps
+ {org.clojure/clojure {:mvn/version "1.11.1"}
+  ring/ring-core {:mvn/version "1.11.0"}
+  ring/ring-jetty-adapter {:mvn/version "1.11.0"}
+  metosin/reitit {:mvn/version "0.10.0"}
+  metosin/jsonista {:mvn/version "0.3.8"}}}
