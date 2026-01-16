@@ -1,15 +1,14 @@
 (ns kanban.core
   (:require
-   [ring.adapter.jetty :as jetty])
+   [ring.adapter.jetty :as jetty]
+   [kanban.http.routes :as routes]
+   [kanban.infra.middleware :refer [wrap-http]])
   (:gen-class))
 
 (def PORT 3000)
 
-(defn handler [request]
-  {:status 200
-   :headers {"Content-Type" "application/json"}
-   :body "Hello World"})
-
 (defn -main [& _]
-  (println "Server runnning on port" PORT)
-  (jetty/run-jetty handler {:port PORT :join? false}))
+  (let [app (wrap-http routes/app-routes)]
+    (println "Server runnning on port" PORT)
+    (jetty/run-jetty app {:port PORT :join? false}))) 
+
