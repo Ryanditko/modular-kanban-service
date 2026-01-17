@@ -6,19 +6,19 @@
   [:enum "todo" "doing" "done"])
 
 (def CreateCardRequest
-  [:map
+  [:map {:closed true}
    [:title [:string {:min 1 :max 200}]]
    [:description {:optional true} [:string {:max 1000}]]
    [:status CardStatus]])
 
 (def UpdateCardRequest
-  [:map
+  [:map {:closed true}
    [:title {:optional true} [:string {:min 1 :max 200}]]
    [:description {:optional true} [:string {:max 1000}]]
    [:status {:optional true} CardStatus]])
 
 (def MoveCardRequest
-  [:map
+  [:map {:closed true}
    [:status CardStatus]])
 
 (defn validate! [schema data]
