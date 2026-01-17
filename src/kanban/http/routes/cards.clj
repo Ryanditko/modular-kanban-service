@@ -1,14 +1,8 @@
-(ns kanban.http.routes.endpoints
-  (:require
-   [kanban.http.handlers.health :as health]
-   [kanban.http.handlers.cards :as cards]))
+(ns kanban.http.routes.cards
+  (:require [kanban.http.handlers.cards :as cards]))
 
-(def routes 
-  [["/api"
-    ["/health" {:get {:handler health/handler
-                      :summary "Health check endpoint"}}]
-
-    ["/cards"
+(def routes
+  ["/cards"
      ["" {:get {:handler cards/list-cards
                 :summary "List all cards"}
           :post {:handler cards/create-card
@@ -19,4 +13,4 @@
               :put {:handler cards/update-card
                     :summary "Update a card"}
               :delete {:handler cards/delete-card
-                       :summary "Remove a card"}}]]]])
+                       :summary "Remove a card"}}]])
