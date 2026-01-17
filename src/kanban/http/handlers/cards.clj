@@ -21,22 +21,20 @@
          :body {:message "Card created successfully"
                 :card card}}))
     (catch clojure.lang.ExceptionInfo e
-      (let [error-type (:type (ex-data e))]
-        (cond
-          (= :validation-error error-type)
-          {:status 400
-           :body {:error "Validation failed"
-                  :details (:errors (ex-data e))}}
+      (case (:type (ex-data e))
+        :validation-error
+        {:status 400
+         :body {:error "Validation failed"
+                :details (:errors (ex-data e))}}
 
-          (= :invalid-status error-type)
-          {:status 400
-           :body {:error "Invalid status"
-                  :details (ex-data e)}}
+        :invalid-status
+        {:status 400
+         :body {:error "Invalid status"
+                :details (ex-data e)}}
 
-          :else
-          {:status 500
-           :body {:error "Internal server error"
-                  :message (.getMessage e)}})))
+        {:status 500
+         :body {:error "Internal server error"
+                :message (.getMessage e)}}))
     (catch Exception e
       {:status 500
        :body {:error "Unexpected error"
@@ -59,20 +57,18 @@
         (resp/ok {:message "Card updated successfully"
                   :card card}))
       (catch clojure.lang.ExceptionInfo e
-        (let [error-type (:type (ex-data e))]
-          (cond
-            (= :validation-error error-type)
-            {:status 400
-             :body {:error "Validation failed"
-                    :details (:errors (ex-data e))}}
+        (case (:type (ex-data e))
+          :validation-error
+          {:status 400
+           :body {:error "Validation failed"
+                  :details (:errors (ex-data e))}}
 
-            (= :not-found error-type)
-            (resp/not-found {:error "Card not found" :id id})
+          :not-found
+          (resp/not-found {:error "Card not found" :id id})
 
-            :else
-            {:status 500
-             :body {:error "Internal server error"
-                    :message (.getMessage e)}})))
+          {:status 500
+           :body {:error "Internal server error"
+                  :message (.getMessage e)}}))
       (catch Exception e
         {:status 500
          :body {:error "Unexpected error"
@@ -96,20 +92,18 @@
         (resp/ok {:message "Card moved successfully"
                   :card card}))
       (catch clojure.lang.ExceptionInfo e
-        (let [error-type (:type (ex-data e))]
-          (cond
-            (= :validation-error error-type)
-            {:status 400
-             :body {:error "Validation failed"
-                    :details (:errors (ex-data e))}}
+        (case (:type (ex-data e))
+          :validation-error
+          {:status 400
+           :body {:error "Validation failed"
+                  :details (:errors (ex-data e))}}
 
-            (= :not-found error-type)
-            (resp/not-found {:error "Card not found" :id id})
+          :not-found
+          (resp/not-found {:error "Card not found" :id id})
 
-            :else
-            {:status 500
-             :body {:error "Internal server error"
-                    :message (.getMessage e)}})))
+          {:status 500
+           :body {:error "Internal server error"
+                  :message (.getMessage e)}}))
       (catch Exception e
         {:status 500
          :body {:error "Unexpected error"
