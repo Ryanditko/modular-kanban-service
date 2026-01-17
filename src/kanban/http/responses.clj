@@ -11,4 +11,3 @@
 (defn method-not-allowed [body]
   {:status 405
    :body body})
-
