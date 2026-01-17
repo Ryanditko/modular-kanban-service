@@ -1,6 +1,7 @@
 (ns kanban.http.handlers.cards
   (:require [kanban.http.responses :as resp]
-            [kanban.domain.cards :as domain]))
+            [kanban.domain.cards :as domain]
+            [kanban.http.schemas.cards :as schemas]))
 
 (defn list-cards [req]
   (let [status (get-in req [:query-params "status"])]
@@ -13,11 +14,20 @@
 
 (defn create-card [req]
   (try
-    (let [body (:body-params req)
-          card (domain/create-card! body)]
-      {:status 201
-       :body {:message "Card created successfully"
-              :card card}})
+    (let [body (:body-params req)]
+      (schemas/validate! schemas/CreateCardRequest body)
+      (let [card (domain/create-card! body)]
+        {:status 201
+         :body {:message "Card created successfully"
+                :card card}}))
+    (catch clojure.lang.ExceptionInfo e
+      (if (= :validation-error (:type (ex-data e)))
+        {:status 400
+         :body {:error "Validation failed"
+                :details (:errors (ex-data e))}}
+        {:status 500
+         :body {:error "Internal server error"
+                :message (.getMessage e)}}))
     (catch Exception e
       {:status 400
        :body {:error "Failed to create card"
@@ -35,11 +45,22 @@
   (let [id (get-in req [:path-params :id])
         updates (:body-params req)]
     (try
+      (schemas/validate! schemas/UpdateCardRequest updates)
       (if-let [card (domain/update-card! id updates)]
         (resp/ok {:message "Card updated successfully"
                   :card card})
         (resp/not-found {:error "Card not found"
                          :id id}))
+      (catch clojure.lang.ExceptionInfo e
+        (if (= :validation-error (:type (ex-data e)))
+          {:status 400
+           :body {:error "Validation failed"
+                  :details (:errors (ex-data e))}}
+          (if (= "Card not found" (.getMessage e))
+            (resp/not-found {:error "Card not found" :id id})
+            {:status 500
+             :body {:error "Internal server error"
+                    :message (.getMessage e)}})))
       (catch Exception e
         {:status 400
          :body {:error "Failed to update card"
@@ -55,13 +76,25 @@
 
 (defn move-card [req]
   (let [id (get-in req [:path-params :id])
-        new-status (get-in req [:body-params :status])]
+        body (:body-params req)]
     (try
-      (if-let [card (domain/move-card! id new-status)]
-        (resp/ok {:message "Card moved successfully"
-                  :card card})
-        (resp/not-found {:error "Card not found"
-                         :id id}))
+      (schemas/validate! schemas/MoveCardRequest body)
+      (let [new-status (:status body)]
+        (if-let [card (domain/move-card! id new-status)]
+          (resp/ok {:message "Card moved successfully"
+                    :card card})
+          (resp/not-found {:error "Card not found"
+                           :id id})))
+      (catch clojure.lang.ExceptionInfo e
+        (if (= :validation-error (:type (ex-data e)))
+          {:status 400
+           :body {:error "Validation failed"
+                  :details (:errors (ex-data e))}}
+          (if (= "Card not found" (.getMessage e))
+            (resp/not-found {:error "Card not found" :id id})
+            {:status 500
+             :body {:error "Internal server error"
+                    :message (.getMessage e)}})))
       (catch Exception e
         {:status 400
          :body {:error "Failed to move card"
