@@ -3,7 +3,7 @@
             [ring.middleware.params :refer [wrap-params]]))
 
 (def mapper (json/object-mapper {:encode-key-fn name
-                                  :decode-key-fn keyword}))
+                                 :decode-key-fn keyword}))
 
 (defn wrap-json-body [handler]
   (fn [request]
