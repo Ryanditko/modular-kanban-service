@@ -46,24 +46,27 @@
         updates (:body-params req)]
     (try
       (schemas/validate! schemas/UpdateCardRequest updates)
-      (if-let [card (domain/update-card! id updates)]
+      (let [card (domain/update-card! id updates)]
         (resp/ok {:message "Card updated successfully"
-                  :card card})
-        (resp/not-found {:error "Card not found"
-                         :id id}))
+                  :card card}))
       (catch clojure.lang.ExceptionInfo e
-        (if (= :validation-error (:type (ex-data e)))
-          {:status 400
-           :body {:error "Validation failed"
-                  :details (:errors (ex-data e))}}
-          (if (= "Card not found" (.getMessage e))
+        (let [error-type (:type (ex-data e))]
+          (cond
+            (= :validation-error error-type)
+            {:status 400
+             :body {:error "Validation failed"
+                    :details (:errors (ex-data e))}}
+
+            (= :not-found error-type)
             (resp/not-found {:error "Card not found" :id id})
+
+            :else
             {:status 500
              :body {:error "Internal server error"
                     :message (.getMessage e)}})))
       (catch Exception e
-        {:status 400
-         :body {:error "Failed to update card"
+        {:status 500
+         :body {:error "Unexpected error"
                 :message (.getMessage e)}}))))
 
 (defn delete-card [req]
@@ -79,23 +82,26 @@
         body (:body-params req)]
     (try
       (schemas/validate! schemas/MoveCardRequest body)
-      (let [new-status (:status body)]
-        (if-let [card (domain/move-card! id new-status)]
-          (resp/ok {:message "Card moved successfully"
-                    :card card})
-          (resp/not-found {:error "Card not found"
-                           :id id})))
+      (let [new-status (:status body)
+            card (domain/move-card! id new-status)]
+        (resp/ok {:message "Card moved successfully"
+                  :card card}))
       (catch clojure.lang.ExceptionInfo e
-        (if (= :validation-error (:type (ex-data e)))
-          {:status 400
-           :body {:error "Validation failed"
-                  :details (:errors (ex-data e))}}
-          (if (= "Card not found" (.getMessage e))
+        (let [error-type (:type (ex-data e))]
+          (cond
+            (= :validation-error error-type)
+            {:status 400
+             :body {:error "Validation failed"
+                    :details (:errors (ex-data e))}}
+
+            (= :not-found error-type)
             (resp/not-found {:error "Card not found" :id id})
+
+            :else
             {:status 500
              :body {:error "Internal server error"
                     :message (.getMessage e)}})))
       (catch Exception e
-        {:status 400
-         :body {:error "Failed to move card"
+        {:status 500
+         :body {:error "Unexpected error"
                 :message (.getMessage e)}}))))
