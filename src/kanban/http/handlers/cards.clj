@@ -14,31 +14,23 @@
 
 (defn create-card [req]
   (try
-    (let [body (:body-params req)]
+    (let [body (:body-params req)
+          datasource (:db req)]
       (schemas/validate! schemas/CreateCardRequest body)
-      (let [card (domain/create-card! body)]
-        {:status 201
-         :body {:message "Card created successfully"
-                :card card}}))
+      (let [card (domain/create-card! datasource body)]
+        (resp/created {:message "Card created successfully"
+                       :card card})))
     (catch clojure.lang.ExceptionInfo e
       (case (:type (ex-data e))
-        :validation-error
-        {:status 400
-         :body {:error "Validation failed"
-                :details (:errors (ex-data e))}}
-
-        :invalid-status
-        {:status 400
-         :body {:error "Invalid status"
-                :details (ex-data e)}}
-
-        {:status 500
-         :body {:error "Internal server error"
-                :message (.getMessage e)}}))
+        :validation-error (resp/general-error {:error "Validation failed"
+                                               :errors (ex-data e)})
+        :invalid-status (resp/general-error {:error "Invalid status"
+                                             :errors (ex-data e)}) 
+        (resp/internal-server-error {:error "Internal server error"
+                                     :message (.getMessage e)})))
     (catch Exception e
-      {:status 500
-       :body {:error "Unexpected error"
-              :message (.getMessage e)}})))
+      (resp/internal-server-error {:error "Unexpected error"
+                                   :message (.getMessage e)}))))
 
 (defn get-card [req]
   (let [id (get-in req [:path-params :id])

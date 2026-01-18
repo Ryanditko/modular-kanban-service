@@ -1,4 +1,5 @@
-(ns kanban.domain.cards)
+(ns kanban.domain.cards
+  (:require [kanban.db.card :as db]))
 
 (defonce cards-db (atom {}))
 
@@ -7,24 +8,12 @@
 (defn valid-status? [status]
   (contains? valid-statuses status))
 
-(defn- generate-id []
-  (str (java.util.UUID/randomUUID)))
-
 (defn- current-timestamp []
   (str (java.time.Instant/now)))
 
-(defn create-card! [{:keys [title description status]}]
-  ;; Schema validation ensures status is present and valid
-  (let [id (generate-id)
-        now (current-timestamp)
-        card {:id id
-              :title title
-              :description (or description "")
-              :status status
-              :created-at now
-              :updated-at now}]
-    (swap! cards-db assoc id card)
-    card))
+(defn create-card! [datasource card]
+  (let [card' (update card :description #(or % ""))]
+    (db/insert-task datasource card')))
 
 (defn get-card [id]
   (get @cards-db id))
