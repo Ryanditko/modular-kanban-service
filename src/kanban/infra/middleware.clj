@@ -24,8 +24,17 @@
             (assoc-in [:headers "Content-Type"] "application/json"))
         response))))
 
+(defn wrap-db [handler db]
+  (fn [request]
+    (handler (assoc request :db db))))
+
 (defn wrap-http [handler]
   (-> handler
       wrap-params
       wrap-json-body
       wrap-json-response))
+
+(defn wrap-app [handler datasource]
+  (-> handler
+      (wrap-db datasource)
+      (wrap-http)))

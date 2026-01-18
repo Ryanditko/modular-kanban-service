@@ -2,7 +2,7 @@
   (:require
    [ring.adapter.jetty :as jetty]
    [kanban.http.routes :refer [app-routes]]
-   [kanban.infra.middleware :refer [wrap-http]]
+   [kanban.infra.middleware :refer [wrap-app]]
    [kanban.db.core :as db])
   (:gen-class))
 
@@ -10,7 +10,7 @@
 
 (defn -main [& _]
   (let [{:keys [datasource]} (db/start)
-        app (wrap-http app-routes)
+        app (wrap-app app-routes datasource)
         server (jetty/run-jetty app {:port PORT :join? false})]
     
     (println "Server runnning on port" PORT)

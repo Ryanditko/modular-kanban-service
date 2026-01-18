@@ -4,6 +4,5 @@
    [kanban.http.routes.cards :as cards]))
 
 (def routes 
-  ["/api"
-    health/routes
+  [health/routes
     cards/routes])
