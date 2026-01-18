@@ -1,0 +1,5 @@
+{:db
+ {:jdbc-url #env DATABASE_URL
+  :username #env DB_USER
+  :password #env DB_PASSWORD
+  :maximum-pool-size 10}}
