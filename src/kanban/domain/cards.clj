@@ -13,11 +13,8 @@
 (defn- current-timestamp []
   (str (java.time.Instant/now)))
 
-(defn create-card! [{:keys [title description status] :or {status "todo"}}]
-  (when-not title
-    (throw (ex-info "Title is required" {:error :missing-title})))
-  (when-not (valid-status? status)
-    (throw (ex-info "Invalid status" {:status status :valid-statuses valid-statuses})))
+(defn create-card! [{:keys [title description status]}]
+  ;; Schema validation ensures status is present and valid
   (let [id (generate-id)
         now (current-timestamp)
         card {:id id
@@ -41,10 +38,12 @@
 
 (defn update-card! [id updates]
   (when-not (get-card id)
-    (throw (ex-info "Card not found" {:id id})))
+    (throw (ex-info "Card not found" {:type :not-found :id id})))
   (when-let [new-status (:status updates)]
     (when-not (valid-status? new-status)
-      (throw (ex-info "Invalid status" {:status new-status :valid-statuses valid-statuses}))))
+      (throw (ex-info "Invalid status" {:type :invalid-status
+                                        :status new-status
+                                        :valid-statuses valid-statuses}))))
   (let [current-card (get-card id)
         updated-card (-> current-card
                          (merge updates)
@@ -60,7 +59,9 @@
 
 (defn move-card! [id new-status]
   (when-not (valid-status? new-status)
-    (throw (ex-info "Invalid status" {:status new-status :valid-statuses valid-statuses})))
+    (throw (ex-info "Invalid status" {:type :invalid-status
+                                      :status new-status
+                                      :valid-statuses valid-statuses})))
   (update-card! id {:status new-status}))
 
 (defn get-board []
