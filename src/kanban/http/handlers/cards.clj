@@ -4,13 +4,19 @@
             [kanban.http.schemas.cards :as schemas]))
 
 (defn list-cards [req]
-  (let [status (get-in req [:query-params "status"])]
-    (resp/ok {:cards (if status
-                       (domain/list-cards status)
-                       (domain/list-cards))})))
-
-(defn get-cards-by-status [_req]
-  (resp/ok (domain/get-board)))
+  (try
+    (let [datasource (:db req)
+          params (get-in req [:parameters :query])]
+      (resp/ok (domain/list-cards datasource params)))
+    (catch clojure.lang.ExceptionInfo e
+      (case (:type (ex-data e))
+        :validation-error (resp/general-error {:error "Validation failed"
+                                               :errors (ex-data e)})
+        (resp/internal-server-error {:error "Internal server error"
+                                     :message (.getMessage e)})))
+    (catch Exception e
+      (resp/internal-server-error {:error "Unexpected error"
+                                   :message (.getMessage e)}))))
 
 (defn create-card [req]
   (try
@@ -25,7 +31,7 @@
         :validation-error (resp/general-error {:error "Validation failed"
                                                :errors (ex-data e)})
         :invalid-status (resp/general-error {:error "Invalid status"
-                                             :errors (ex-data e)}) 
+                                             :errors (ex-data e)})
         (resp/internal-server-error {:error "Internal server error"
                                      :message (.getMessage e)})))
     (catch Exception e

@@ -11,6 +11,10 @@
    [:description {:optional true} [:string {:max 1000}]]
    [:status CardStatus]])
 
+(def GetCardRequestQueryParams
+  [:map {:closed true}
+   [:status {:optional true} CardStatus]])
+
 (def UpdateCardRequest
   [:map {:closed true}
    [:title {:optional true} [:string {:min 1 :max 200}]]
