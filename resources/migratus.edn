@@ -1,0 +1,7 @@
+{:store :database
+ :migration-dir "migrations"
+ :db {:dbtype "postgres"
+      :dbname "kanban"
+      :jdbc-url #env DATABASE_URL
+      :user #env DB_USER
+      :password #env DB_PASSWORD}}
