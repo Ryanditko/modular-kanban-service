@@ -26,7 +26,7 @@ A RESTful API backend for managing Kanban cards built with Clojure. This project
 
 ### 2. Clone the repository
 ```bash
-git clone https://github.com/Ryanditko/clojure-kanban.git
+git clone https://github.com/Ryanditko/modular-kanban-service.git
 cd clojure-kanban
 ```
 
