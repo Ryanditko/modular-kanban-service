@@ -1,7 +1,7 @@
 # Clojure Kanban API
 
 <p align="center">
-  <img src="blob:https://imgur.com/80c8d72c-4c08-45c0-be8d-48dd97c05896" alt="kanban" width="800">
+  <img src="https://imgur.com/1Te5uDO" alt="kanban" width="800">
 </p>
 
 ## Overview
